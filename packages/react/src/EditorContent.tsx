@@ -1,6 +1,9 @@
+// 2
+
 import type { Editor } from '@tiptap/core'
 import type { ForwardedRef, HTMLProps, LegacyRef, MutableRefObject } from 'react'
-import React, { forwardRef } from 'react'
+// problem
+import React, { forwardRef, useRef, useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
 
@@ -83,124 +86,101 @@ function getInstance(): ContentComponent {
   }
 }
 
-export class PureEditorContent extends React.Component<
-  EditorContentProps,
-  { hasContentComponentInitialized: boolean }
-> {
-  editorContentRef: React.RefObject<any>
+export const PureEditorContent: React.FC<EditorContentProps> = props => {
+  const { editor, innerRef, ...rest } = props
 
-  initialized: boolean
+  const editorContentRef = useRef<HTMLDivElement>(null)
 
-  unsubscribeToContentComponent?: () => void
+  // do i even need this ref?
+  const initialized = useRef(false)
 
-  constructor(props: EditorContentProps) {
-    super(props)
-    this.editorContentRef = React.createRef()
-    this.initialized = false
+  const [hasContentComponentInitialized, setHasContentComponentInitialized] = useState(
+    !!(editor as EditorWithContentComponent | null)?.contentComponent
+  )
 
-    this.state = {
-      hasContentComponentInitialized: Boolean((props.editor as EditorWithContentComponent | null)?.contentComponent),
-    }
-  }
+const unsubscribeRef = useRef<ReturnType<ContentComponent['subscribe']>>();
+ 
+  
+useEffect(() => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = undefined;
+      }
 
-  componentDidMount() {
-    this.init()
-  }
+      const editorWithContent = editor as EditorWithContentComponent | null
 
-  componentDidUpdate() {
-    this.init()
-  }
+      if (editorWithContent && !editorWithContent.isDestroyed && editorWithContent.options.element) {
+        if (editorWithContent.contentComponent) {
+          return
+        }
 
-  init() {
-    const editor = this.props.editor as EditorWithContentComponent | null
+        const element = editorContentRef.current
+        if (element) {
+          element.append(...editorWithContent.options.element.childNodes)
 
-    if (editor && !editor.isDestroyed && editor.options.element) {
-      if (editor.contentComponent) {
+          editorWithContent.setOptions({
+            element,
+          })
+        }
+
+        editorWithContent.contentComponent = getInstance()
+        // Has the content component been initialized?
+        if (!hasContentComponentInitialized) {
+          // Subscribe to the content component
+          unsubscribeRef.current = editorWithContent.contentComponent.subscribe(() => {
+            setHasContentComponentInitialized(true)
+          })
+          // Set to unsubscribe to previous content component for use in useEffect cleanup
+          
+        }
+
+        editorWithContent.createNodeViews()
+        initialized.current = true
+      }
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = undefined;
+      }
+
+      const editorWithContent = editor as EditorWithContentComponent | null
+      if (!editorWithContent) {
         return
       }
 
-      const element = this.editorContentRef.current
+      initialized.current = false
 
-      element.append(...editor.options.element.childNodes)
-
-      editor.setOptions({
-        element,
-      })
-
-      editor.contentComponent = getInstance()
-
-      // Has the content component been initialized?
-      if (!this.state.hasContentComponentInitialized) {
-        // Subscribe to the content component
-        this.unsubscribeToContentComponent = editor.contentComponent.subscribe(() => {
-          this.setState(prevState => {
-            if (!prevState.hasContentComponentInitialized) {
-              return {
-                hasContentComponentInitialized: true,
-              }
-            }
-            return prevState
-          })
-
-          // Unsubscribe to previous content component
-          if (this.unsubscribeToContentComponent) {
-            this.unsubscribeToContentComponent()
-          }
+      if (!editorWithContent.isDestroyed) {
+        editorWithContent.view.setProps({
+          // !!!... not this actually
+          nodeViews: {},
         })
       }
 
-      editor.createNodeViews()
+      editorWithContent.contentComponent = null
 
-      this.initialized = true
-    }
-  }
+      if (!editorWithContent.options.element?.firstChild) {
+        return
+      }
 
-  componentWillUnmount() {
-    const editor = this.props.editor as EditorWithContentComponent | null
+      const newElement = document.createElement('div')
+      newElement.append(...editorWithContent.options.element.childNodes)
 
-    if (!editor) {
-      return
-    }
-
-    this.initialized = false
-
-    if (!editor.isDestroyed) {
-      editor.view.setProps({
-        nodeViews: {},
+      editorWithContent.setOptions({
+        element: newElement,
       })
     }
+  }, [editor, hasContentComponentInitialized])
 
-    if (this.unsubscribeToContentComponent) {
-      this.unsubscribeToContentComponent()
-    }
 
-    editor.contentComponent = null
-
-    if (!editor.options.element?.firstChild) {
-      return
-    }
-
-    // TODO using the new editor.mount method might allow us to remove this
-    const newElement = document.createElement('div')
-
-    newElement.append(...editor.options.element.childNodes)
-
-    editor.setOptions({
-      element: newElement,
-    })
-  }
-
-  render() {
-    const { editor, innerRef, ...rest } = this.props
-
-    return (
+ return (
       <>
-        <div ref={mergeRefs(innerRef, this.editorContentRef)} {...rest} />
+        <div ref={mergeRefs(innerRef, editorContentRef)} {...rest} />
         {/* @ts-ignore */}
         {editor?.contentComponent && <Portals contentComponent={editor.contentComponent} />}
       </>
     )
-  }
 }
 
 // EditorContent should be re-created whenever the Editor instance changes
@@ -212,6 +192,7 @@ const EditorContentWithKey = forwardRef<HTMLDivElement, EditorContentProps>(
     }, [props.editor])
 
     // Can't use JSX here because it conflicts with the type definition of Vue's JSX, so use createElement
+    // debugger;
     return React.createElement(PureEditorContent, {
       key,
       innerRef: ref,

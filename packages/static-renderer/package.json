@@ -91,6 +91,7 @@
     "directory": "packages/static-renderer"
   },
   "scripts": {
+    "dev": "tsup --watch",
     "build": "tsup",
     "lint": "prettier ./src/ --check && eslint --cache --quiet --no-error-on-unmatched-pattern ./src/"
   }

@@ -144,6 +144,9 @@ type ComponentType<R, P> =
  *   as: 'span',
  * })
  */
+
+// turn to FC
+
 export class ReactRenderer<R = unknown, P extends Record<string, any> = object> {
   id: string
 
@@ -171,6 +174,7 @@ export class ReactRenderer<R = unknown, P extends Record<string, any> = object> 
     this.editor = editor as EditorWithContentComponent
     this.props = props as P
     this.element = document.createElement(as)
+    // !!!
     this.element.classList.add('react-renderer')
 
     if (className) {

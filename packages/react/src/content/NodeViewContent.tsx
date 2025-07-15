@@ -1,7 +1,9 @@
+// 4?
+
 import type { ComponentProps } from 'react'
 import React from 'react'
 
-import { useReactNodeView } from './useReactNodeView.js'
+// import { useReactNodeView } from './useReactNodeView.js'
 
 export type NodeViewContentProps<T extends keyof React.JSX.IntrinsicElements = 'div'> = {
   as?: NoInfer<T>
@@ -11,20 +13,26 @@ export function NodeViewContent<T extends keyof React.JSX.IntrinsicElements = 'd
   as: Tag = 'div' as T,
   ...props
 }: NodeViewContentProps<T>) {
-  const { nodeViewContentRef, nodeViewContentChildren } = useReactNodeView()
+  // why
+  // const { nodeViewContentRef, nodeViewContentChildren } = useReactNodeView()
+
+  console.log("NodeViewContent", {props})
 
   return (
     // @ts-ignore
     <Tag
       {...props}
-      ref={nodeViewContentRef}
+      // ref={nodeViewContentRef}
       data-node-view-content=""
+      // className={props.className}
       style={{
         whiteSpace: 'pre-wrap',
         ...props.style,
       }}
     >
-      {nodeViewContentChildren}
+      {props.children}
+      {props.content}
+      {/* nodeViewContentChildren */}
     </Tag>
   )
 }

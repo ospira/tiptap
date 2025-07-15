@@ -1,3 +1,5 @@
+// 1
+
 import { type EditorOptions, Editor } from '@tiptap/core'
 import type { DependencyList, MutableRefObject } from 'react'
 import { useDebugValue, useEffect, useRef, useState } from 'react'
@@ -44,10 +46,10 @@ class EditorInstanceManager {
   private options: MutableRefObject<UseEditorOptions>
 
   /**
-   * The subscriptions to notify when the editor instance
+   * The subscribers to notify when the editor instance
    * has been created or destroyed.
    */
-  private subscriptions = new Set<() => void>()
+  private subscribers = new Set<() => void>()
 
   /**
    * A timeout to destroy the editor if it was not mounted within a time frame.
@@ -70,8 +72,10 @@ class EditorInstanceManager {
   public instanceId = ''
 
   constructor(options: MutableRefObject<UseEditorOptions>) {
+    console.log("EditorInstanceManager", {options})
     this.options = options
-    this.subscriptions = new Set<() => void>()
+    this.subscribers = new Set<() => void>()
+    // ?
     this.setEditor(this.getInitialEditor())
     this.scheduleDestroy()
 
@@ -81,7 +85,11 @@ class EditorInstanceManager {
     this.refreshEditorInstance = this.refreshEditorInstance.bind(this)
     this.scheduleDestroy = this.scheduleDestroy.bind(this)
     this.onRender = this.onRender.bind(this)
+    // ?
     this.createEditor = this.createEditor.bind(this)
+
+    const editor = this.editor
+    console.log("EditorInstanceManager", {editor})
   }
 
   private setEditor(editor: Editor | null) {
@@ -89,7 +97,10 @@ class EditorInstanceManager {
     this.instanceId = Math.random().toString(36).slice(2, 9)
 
     // Notify all subscribers that the editor instance has been created
-    this.subscriptions.forEach(cb => cb())
+    this.subscribers.forEach(cb => {
+      // debugger;
+      cb()
+  })
   }
 
   private getInitialEditor() {
@@ -128,9 +139,12 @@ class EditorInstanceManager {
   }
 
   /**
-   * Create a new editor instance. And attach event listeners.
+   * Create a new editor instance. An d attach event listeners.
    */
   private createEditor(): Editor {
+    console.trace("createEditor()")
+    console.log("this.options.current", this.options.current)
+    // debugger; 
     const optionsToApply: Partial<EditorOptions> = {
       ...this.options.current,
       // Always call the most recent version of the callback function by default
@@ -169,13 +183,12 @@ class EditorInstanceManager {
   }
 
   /**
-   * Subscribe to the editor instance's changes.
+   * Subscribe to editor instance changes.
    */
-  subscribe(onStoreChange: () => void) {
-    this.subscriptions.add(onStoreChange)
-
+  subscribe(callback: () => void): () => void {
+    this.subscribers.add(callback)
     return () => {
-      this.subscriptions.delete(onStoreChange)
+      this.subscribers.delete(callback)
     }
   }
 
@@ -228,6 +241,7 @@ class EditorInstanceManager {
   onRender(deps: DependencyList) {
     // The returned callback will run on each render
     return () => {
+      console.log('Test custom tiptap/react bundle')
       this.isComponentMounted = true
       // Cleanup any scheduled destructions, since we are currently rendering
       clearTimeout(this.scheduledDestructionTimeout)
@@ -243,6 +257,7 @@ class EditorInstanceManager {
           })
         }
       } else {
+        /// !!!! immediatelyRender: false
         // When the editor:
         // - does not yet exist
         // - is destroyed
@@ -262,6 +277,8 @@ class EditorInstanceManager {
    * Recreate the editor instance if the dependencies have changed.
    */
   private refreshEditorInstance(deps: DependencyList) {
+    console.trace()
+    console.log("refreshEditorInstance()")
     if (this.editor && !this.editor.isDestroyed) {
       // Editor instance already exists
       if (this.previousDeps === null) {
@@ -282,7 +299,7 @@ class EditorInstanceManager {
       // Destroy the editor instance if it exists
       this.editor.destroy()
     }
-
+    // first creation immediatelyRender: false
     this.setEditor(this.createEditor())
 
     // Update the lastDeps to the current deps

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { createContext, createElement, useContext } from 'react'
 
 export interface ReactNodeViewContextProps {
+  // why?
   onDragStart?: (event: DragEvent) => void
   nodeViewContentRef?: (element: HTMLElement | null) => void
   /**
@@ -22,7 +23,8 @@ export const ReactNodeViewContext = createContext<ReactNodeViewContextProps>({
 })
 
 export const ReactNodeViewContentProvider = ({ children, content }: { children: ReactNode; content: ReactNode }) => {
+  // why? this is what is passing the children into NodeViewContent
   return createElement(ReactNodeViewContext.Provider, { value: { nodeViewContentChildren: content } }, children)
 }
-
+// problem
 export const useReactNodeView = () => useContext(ReactNodeViewContext)

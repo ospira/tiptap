@@ -1,6 +1,6 @@
 import { Extension } from '@tiptap/core'
-import type { BlockquoteOptions } from '@tiptap/extension-blockquote'
-import { Blockquote } from '@tiptap/extension-blockquote'
+// import type { BlockquoteOptions } from '@tiptap/extension-blockquote'
+// import { Blockquote } from '@tiptap/extension-blockquote'
 import type { BoldOptions } from '@tiptap/extension-bold'
 import { Bold } from '@tiptap/extension-bold'
 import type { CodeOptions } from '@tiptap/extension-code'
@@ -35,7 +35,7 @@ export interface StarterKitOptions {
    * If set to false, the blockquote extension will not be registered
    * @example blockquote: false
    */
-  blockquote: Partial<BlockquoteOptions> | false
+  // blockquote: Partial<BlockquoteOptions> | false
 
   /**
    * If set to false, the bold extension will not be registered
@@ -179,9 +179,9 @@ export const StarterKit = Extension.create<StarterKitOptions>({
       extensions.push(Bold.configure(this.options.bold))
     }
 
-    if (this.options.blockquote !== false) {
-      extensions.push(Blockquote.configure(this.options.blockquote))
-    }
+    // if (this.options.blockquote !== false) {
+    //   extensions.push(Blockquote.configure(this.options.blockquote))
+    // }
 
     if (this.options.bulletList !== false) {
       extensions.push(BulletList.configure(this.options.bulletList))
@@ -262,6 +262,8 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     if (this.options.trailingNode !== false) {
       extensions.push(TrailingNode.configure(this.options?.trailingNode))
     }
+
+    console.log('Test custom tiptap/starter-kit bundle')
 
     return extensions
   },

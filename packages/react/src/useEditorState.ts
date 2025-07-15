@@ -39,12 +39,20 @@ class EditorStateManager<TEditor extends Editor | null = Editor | null> {
 
   private editor: TEditor
 
+  /**
+   * The subscribers to notify 
+   * (or not notify - see selector/options.shouldRerenderOnTransaction) 
+   * when the editor
+   * has a transaction change.
+   */
   private subscribers = new Set<() => void>()
 
   constructor(initialEditor: TEditor) {
+    console.log("EditorStateManager", {initialEditor})
     this.editor = initialEditor
     this.lastSnapshot = { editor: initialEditor, transactionNumber: 0 }
-
+    const lastSnapshot = this.lastSnapshot
+    console.log("EditorStateManager", {lastSnapshot})
     this.getSnapshot = this.getSnapshot.bind(this)
     this.getServerSnapshot = this.getServerSnapshot.bind(this)
     this.watch = this.watch.bind(this)
@@ -168,6 +176,8 @@ export function useEditorState<TSelectorResult>(
   }, [options.editor, editorStateManager])
 
   useDebugValue(selectedState)
+
+  // debugger;
 
   return selectedState
 }

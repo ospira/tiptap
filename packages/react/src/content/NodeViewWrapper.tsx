@@ -1,6 +1,8 @@
+// 3?
+
 import React from 'react'
 
-import { useReactNodeView } from './useReactNodeView.js'
+// import { useReactNodeView } from './useReactNodeView.js'
 
 export interface NodeViewWrapperProps {
   [key: string]: any
@@ -8,7 +10,12 @@ export interface NodeViewWrapperProps {
 }
 
 export const NodeViewWrapper: React.FC<NodeViewWrapperProps> = React.forwardRef((props, ref) => {
-  const { onDragStart } = useReactNodeView()
+  
+  console.log("NodeViewWrapper", {props})
+
+  // debugger;
+  
+  // const { onDragStart } = useReactNodeView()
   const Tag = props.as || 'div'
 
   return (
@@ -17,7 +24,8 @@ export const NodeViewWrapper: React.FC<NodeViewWrapperProps> = React.forwardRef(
       {...props}
       ref={ref}
       data-node-view-wrapper=""
-      onDragStart={onDragStart}
+      // onDragStart={onDragStart}
+      // className={props.className}
       style={{
         whiteSpace: 'normal',
         ...props.style,

@@ -21,13 +21,23 @@ export function renderJSONContentToReactElement<
   } = NodeType,
 >(options: TiptapStaticRendererOptions<React.ReactNode, TMarkType, TNodeType>) {
   let key = 0
-
+  console.log("this was rendererArgs in extensionRenderer", {options})
+  // debugger;
   return TiptapStaticRenderer<React.ReactNode, TMarkType, TNodeType>(({ component, props: { children, ...props } }) => {
+    // console.log("inner debugger")
+    console.log("To wrap:", {component}) // 
+    // debugger;
     return React.createElement(
+
+      Object.entries(options.nodeMapping).find(([key, val])=>
+        val === component)[0] ?? 'div',
+      { key: key++ },
+      React.createElement(
       component as React.FC<typeof props>,
       // eslint-disable-next-line no-plusplus
       Object.assign(props, { key: key++ }),
       ([] as React.ReactNode[]).concat(children),
+    )
     )
   }, options)
 }

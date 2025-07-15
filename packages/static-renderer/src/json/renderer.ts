@@ -180,18 +180,23 @@ export function TiptapStaticRenderer<
      */
     parent?: TNodeType
   }): TReturnType {
+    // debugger;
+    // extension name
     const nodeType = typeof content.type === 'string' ? content.type : content.type.name
     const NodeHandler = nodeMapping[nodeType] ?? unhandledNode
 
     if (!NodeHandler) {
       throw new Error(`missing handler for node type ${nodeType}`)
     }
-
+    console.log("about to render nodeContent")
+    // debugger;
     const nodeContent = renderComponent({
-      component: NodeHandler,
+      component: NodeHandler, // the callback in nodeMapping()
+      // so how to wrap this here... with the nodeType/name
       props: {
         node: content,
         parent,
+        // recursive renderContent call
         renderElement: renderContent,
         // Lazily compute the children to avoid unnecessary recursion
         get children() {

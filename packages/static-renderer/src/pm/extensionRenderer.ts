@@ -59,7 +59,7 @@ export function mapNodeExtensionToReactNode<T>(
       },
     ]
   }
-
+  // debugger;
   return [
     extension.name,
     ({ node, children }) => {
@@ -173,8 +173,7 @@ export function renderToElement<T>({
   if (!(content instanceof Node)) {
     content = Node.fromJSON(getSchemaByResolvedExtensions(extensions), content)
   }
-
-  return renderer({
+  const rendererArgs = {
     ...options,
     nodeMapping: {
       ...Object.fromEntries(
@@ -186,13 +185,19 @@ export function renderToElement<T>({
             }
             // No need to generate mappings for nodes that are already mapped
             if (options?.nodeMapping) {
+              console.log(options.nodeMapping)
+              // debugger;
+              // instead of return false
+              // should wrap in options.name
+              // ?
               return !(e.name in options.nodeMapping)
             }
             return true
           })
-          .map(nodeExtension =>
-            mapNodeExtensionToReactNode<T>(domOutputSpecToElement, nodeExtension, extensionAttributes, options),
-          ),
+          .map(nodeExtension => {
+            console.log("filter hit", {nodeExtension})
+            return mapNodeExtensionToReactNode<T>(domOutputSpecToElement, nodeExtension, extensionAttributes, options)
+          }),
       ),
       ...mapDefinedTypes,
       ...options?.nodeMapping,
@@ -211,5 +216,10 @@ export function renderToElement<T>({
       ),
       ...options?.markMapping,
     },
-  })({ content })
+  }
+  console.log("this is options in the renderer", {rendererArgs})
+  // debugger;
+  const toReturn = renderer(rendererArgs)({ content })
+  console.log({toReturn})
+  return toReturn
 }

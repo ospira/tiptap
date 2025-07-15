@@ -153,6 +153,7 @@ export function renderToReactElement({
   extensions: Extensions
   options?: Partial<TiptapStaticRendererOptions<React.ReactNode, Mark, Node>>
 }): React.ReactNode {
+  // debugger;
   return renderToElement<React.ReactNode>({
     renderer: renderJSONContentToReactElement,
     domOutputSpecToElement: domOutputSpecToReactElement,
