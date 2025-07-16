@@ -72,7 +72,7 @@ class EditorInstanceManager {
   public instanceId = ''
 
   constructor(options: MutableRefObject<UseEditorOptions>) {
-    console.log("EditorInstanceManager", {options})
+    console.log('EditorInstanceManager', { options })
     this.options = options
     this.subscribers = new Set<() => void>()
     // ?
@@ -89,7 +89,7 @@ class EditorInstanceManager {
     this.createEditor = this.createEditor.bind(this)
 
     const editor = this.editor
-    console.log("EditorInstanceManager", {editor})
+    console.log('EditorInstanceManager', { editor })
   }
 
   private setEditor(editor: Editor | null) {
@@ -100,7 +100,7 @@ class EditorInstanceManager {
     this.subscribers.forEach(cb => {
       // debugger;
       cb()
-  })
+    })
   }
 
   private getInitialEditor() {
@@ -142,9 +142,9 @@ class EditorInstanceManager {
    * Create a new editor instance. An d attach event listeners.
    */
   private createEditor(): Editor {
-    console.trace("createEditor()")
-    console.log("this.options.current", this.options.current)
-    // debugger; 
+    // console.trace("createEditor()")
+    console.log('this.options.current', this.options.current)
+    // debugger;
     const optionsToApply: Partial<EditorOptions> = {
       ...this.options.current,
       // Always call the most recent version of the callback function by default
@@ -277,8 +277,8 @@ class EditorInstanceManager {
    * Recreate the editor instance if the dependencies have changed.
    */
   private refreshEditorInstance(deps: DependencyList) {
-    console.trace()
-    console.log("refreshEditorInstance()")
+    // console.trace()
+    console.log('refreshEditorInstance()')
     if (this.editor && !this.editor.isDestroyed) {
       // Editor instance already exists
       if (this.previousDeps === null) {

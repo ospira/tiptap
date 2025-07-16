@@ -73,7 +73,6 @@ export class ReactNodeView<
   NodeEditor extends Editor = Editor,
   Options extends ReactNodeViewRendererOptions = ReactNodeViewRendererOptions,
 > extends NodeView<Component, NodeEditor, Options> {
-
   /**
    * The renderer instance.
    */
@@ -86,7 +85,7 @@ export class ReactNodeView<
 
   constructor(component: Component, props: NodeViewRendererProps, options?: Partial<Options>) {
     super(component, props, options)
-
+    // debugger
     if (!this.node.isLeaf) {
       if (this.options.contentDOMElementTag) {
         this.contentDOMElement = document.createElement(this.options.contentDOMElementTag)
@@ -117,7 +116,8 @@ export class ReactNodeView<
    * Called on initialization.
    */
   mount() {
-    console.log("you got served");
+    console.log('you got served')
+    // debugger
     const props = {
       editor: this.editor,
       node: this.node,
@@ -149,7 +149,7 @@ export class ReactNodeView<
           element.removeAttribute('data-node-view-wrapper')
         }
         element.appendChild(this.contentDOMElement)
-        console.log({element})
+        console.log({ element })
       }
     }
     // const context = { onDragStart, nodeViewContentRef }
@@ -158,9 +158,10 @@ export class ReactNodeView<
     // For performance reasons, we memoize the provider component
     // And all of the things it requires are declared outside of the component, so it doesn't need to re-render
     const ReactNodeViewProvider: NamedExoticComponent<ReactNodeViewProps<T>> = memo(componentProps => {
+      // debugger
       return (
         // <ReactNodeViewContext.Provider value={context}>
-          createElement(Component, {onDragStart, nodeViewContentRef, ...componentProps}, componentProps.children)
+        createElement(Component, { onDragStart, nodeViewContentRef, /* content, */ ...componentProps })
         // </ReactNodeViewContext.Provider>
       )
     })
@@ -208,7 +209,10 @@ export class ReactNodeView<
    * This is the element that will be used to display the rich-text content of the node.
    */
   get contentDOM() {
-    console.log("contentDOM()")
+    // this is the place!!!
+    console.trace()
+    console.log('contentDOM()')
+    debugger
     if (this.node.isLeaf) {
       return null
     }
@@ -353,7 +357,7 @@ export function ReactNodeViewRenderer<T = HTMLElement>(
   options?: Partial<ReactNodeViewRendererOptions>,
 ): NodeViewRenderer {
   return props => {
-    console.log("ReactNodeViewRenderer from RSC server!!!!");
+    console.log('ReactNodeViewRenderer')
     // try to get the parent component
     // this is important for vue devtools to show the component hierarchy correctly
     // maybe it’s `undefined` because <editor-content> isn’t rendered yet

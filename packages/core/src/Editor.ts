@@ -527,7 +527,7 @@ export class Editor extends EventEmitter<EditorEvents> {
       dispatchTransaction: this.dispatchTransaction.bind(this),
       state: this.editorState,
     })
-    console.trace()
+    // console.trace()
     console.log(492)
 
     // `editor.view` is not yet available at this time.

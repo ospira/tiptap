@@ -59,7 +59,7 @@ export function mapNodeExtensionToReactNode<T>(
       },
     ]
   }
-  // debugger;
+  debugger
   return [
     extension.name,
     ({ node, children }) => {
@@ -195,7 +195,7 @@ export function renderToElement<T>({
             return true
           })
           .map(nodeExtension => {
-            console.log("filter hit", {nodeExtension})
+            console.log('filter hit', { nodeExtension })
             return mapNodeExtensionToReactNode<T>(domOutputSpecToElement, nodeExtension, extensionAttributes, options)
           }),
       ),
@@ -217,9 +217,9 @@ export function renderToElement<T>({
       ...options?.markMapping,
     },
   }
-  console.log("this is options in the renderer", {rendererArgs})
+  console.log('this is options in the renderer', { rendererArgs })
   // debugger;
   const toReturn = renderer(rendererArgs)({ content })
-  console.log({toReturn})
+  console.log({ toReturn })
   return toReturn
 }
