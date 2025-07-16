@@ -143,6 +143,8 @@ export class ReactNodeView<
 
     const onDragStart = this.onDragStart.bind(this)
     const nodeViewContentRef: ReactNodeViewContextProps['nodeViewContentRef'] = element => {
+      console.log('wha wha what')
+      debugger
       if (element && this.contentDOMElement && element.firstChild !== this.contentDOMElement) {
         // remove the nodeViewWrapper attribute from the element
         if (element.hasAttribute('data-node-view-wrapper')) {
@@ -158,10 +160,14 @@ export class ReactNodeView<
     // For performance reasons, we memoize the provider component
     // And all of the things it requires are declared outside of the component, so it doesn't need to re-render
     const ReactNodeViewProvider: NamedExoticComponent<ReactNodeViewProps<T>> = memo(componentProps => {
-      // debugger
+      debugger
       return (
         // <ReactNodeViewContext.Provider value={context}>
-        createElement(Component, { onDragStart, nodeViewContentRef, /* content, */ ...componentProps })
+        createElement(
+          Component,
+          { onDragStart, nodeViewContentRef, /* context, */ ...componentProps },
+          componentProps.node?.content?.content,
+        )
         // </ReactNodeViewContext.Provider>
       )
     })

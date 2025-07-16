@@ -1,8 +1,5 @@
-// 2
-
 import type { Editor } from '@tiptap/core'
 import type { ForwardedRef, HTMLProps, LegacyRef, MutableRefObject } from 'react'
-// problem
 import React, { forwardRef, useRef, useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
@@ -95,53 +92,57 @@ export const PureEditorContent: React.FC<EditorContentProps> = props => {
   const initialized = useRef(false)
 
   const [hasContentComponentInitialized, setHasContentComponentInitialized] = useState(
-    !!(editor as EditorWithContentComponent | null)?.contentComponent
+    !!(editor as EditorWithContentComponent | null)?.contentComponent,
   )
 
-const unsubscribeRef = useRef<ReturnType<ContentComponent['subscribe']>>();
- 
-  
-useEffect(() => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-        unsubscribeRef.current = undefined;
+  const unsubscribeRef = useRef<ReturnType<ContentComponent['subscribe']>>()
+
+  useEffect(() => {
+    // why running 3 times? works on 2nd time (expected in dev mode - after one cleanup)
+    /// fails on 3rd time
+    console.log('run effect!')
+    debugger //...
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current()
+      unsubscribeRef.current = undefined
+    }
+
+    const editorWithContent = editor as EditorWithContentComponent | null
+
+    if (editorWithContent && !editorWithContent.isDestroyed && editorWithContent.options.element) {
+      if (editorWithContent.contentComponent) {
+        return
       }
 
-      const editorWithContent = editor as EditorWithContentComponent | null
+      const element = editorContentRef.current
+      if (element) {
+        element.append(...editorWithContent.options.element.childNodes)
 
-      if (editorWithContent && !editorWithContent.isDestroyed && editorWithContent.options.element) {
-        if (editorWithContent.contentComponent) {
-          return
-        }
-
-        const element = editorContentRef.current
-        if (element) {
-          element.append(...editorWithContent.options.element.childNodes)
-
-          editorWithContent.setOptions({
-            element,
-          })
-        }
-
-        editorWithContent.contentComponent = getInstance()
-        // Has the content component been initialized?
-        if (!hasContentComponentInitialized) {
-          // Subscribe to the content component
-          unsubscribeRef.current = editorWithContent.contentComponent.subscribe(() => {
-            setHasContentComponentInitialized(true)
-          })
-          // Set to unsubscribe to previous content component for use in useEffect cleanup
-          
-        }
-
-        editorWithContent.createNodeViews()
-        initialized.current = true
+        editorWithContent.setOptions({
+          element,
+        })
       }
+
+      editorWithContent.contentComponent = getInstance()
+      // Has the content component been initialized?
+      if (!hasContentComponentInitialized) {
+        // Subscribe to the content component
+        unsubscribeRef.current = editorWithContent.contentComponent.subscribe(() => {
+          setHasContentComponentInitialized(true)
+        })
+        // Set to unsubscribe to previous content component for use in useEffect cleanup
+      }
+
+      editorWithContent.createNodeViews()
+      initialized.current = true
+    }
 
     return () => {
+      console.log('clean effect!')
+      debugger
       if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-        unsubscribeRef.current = undefined;
+        unsubscribeRef.current()
+        unsubscribeRef.current = undefined
       }
 
       const editorWithContent = editor as EditorWithContentComponent | null
@@ -173,14 +174,13 @@ useEffect(() => {
     }
   }, [editor, hasContentComponentInitialized])
 
-
- return (
-      <>
-        <div ref={mergeRefs(innerRef, editorContentRef)} {...rest} />
-        {/* @ts-ignore */}
-        {editor?.contentComponent && <Portals contentComponent={editor.contentComponent} />}
-      </>
-    )
+  return (
+    <>
+      <div ref={mergeRefs(innerRef, editorContentRef)} {...rest} />
+      {/* @ts-ignore */}
+      {editor?.contentComponent && <Portals contentComponent={editor.contentComponent} />}
+    </>
+  )
 }
 
 // EditorContent should be re-created whenever the Editor instance changes
@@ -192,7 +192,7 @@ const EditorContentWithKey = forwardRef<HTMLDivElement, EditorContentProps>(
     }, [props.editor])
 
     // Can't use JSX here because it conflicts with the type definition of Vue's JSX, so use createElement
-    // debugger;
+    debugger
     return React.createElement(PureEditorContent, {
       key,
       innerRef: ref,
