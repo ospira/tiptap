@@ -8,7 +8,6 @@ import type {
   RefAttributes,
 } from 'react'
 import { version as reactVersion } from 'react'
-import { flushSync } from 'react-dom'
 
 import type { EditorWithContentComponent } from './Editor.js'
 
@@ -144,9 +143,6 @@ type ComponentType<R, P> =
  *   as: 'span',
  * })
  */
-
-// turn to FC
-
 export class ReactRenderer<R = unknown, P extends Record<string, any> = object> {
   id: string
 
@@ -174,25 +170,14 @@ export class ReactRenderer<R = unknown, P extends Record<string, any> = object> 
     this.editor = editor as EditorWithContentComponent
     this.props = props as P
     this.element = document.createElement(as)
-    // !!!
     this.element.classList.add('react-renderer')
 
     if (className) {
       this.element.classList.add(...className.split(' '))
     }
-
-    // If the editor is already initialized, we will need to
-    // synchronously render the component to ensure it renders
-    // together with Prosemirror's rendering.
-    if (this.editor.isInitialized) {
-      flushSync(() => {
-        this.render()
-      })
-    } else {
       queueMicrotask(() => {
         this.render()
       })
-    }
   }
 
   /**

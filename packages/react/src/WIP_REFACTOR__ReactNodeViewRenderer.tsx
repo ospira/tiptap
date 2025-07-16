@@ -48,17 +48,11 @@ export interface ReactNodeViewRendererOptions extends NodeViewRendererOptions {
     | ((props: { node: ProseMirrorNode; HTMLAttributes: Record<string, any> }) => Record<string, string>)
 }
 
-export const createReactNodeView = <
-  T = HTMLElement,
-  Component extends ComponentType<ReactNodeViewProps<T>> = ComponentType<ReactNodeViewProps<T>>,
-  NodeEditor extends Editor = Editor,
-  Options extends ReactNodeViewRendererOptions = ReactNodeViewRendererOptions,
-  >
-  (
-     component: ComponentType<ReactNodeViewProps<T>>,
-     props: NodeViewRendererProps,
-     options?:  Partial<ReactNodeViewRendererOptions>,
-  ): NodeView<Component, NodeEditor, Options> =>  {
+export const createReactNodeView = <T = HTMLElement>(
+  component: ComponentType<ReactNodeViewProps<T>>,
+  props: ReactNodeViewProps,
+  options?: Partial<ReactNodeViewRendererOptions>,
+): NodeView<ComponentType<ReactNodeViewProps<T>>, Editor, ReactNodeViewRendererOptions> => {
   const editor = props.editor
   const extension = props.extension
   const node = props.node
@@ -170,20 +164,12 @@ export const createReactNodeView = <
   }
 
   // --- Initialization (replaces the `mount` method) ---
-  const proops: ReactNodeViewProps<T> = {
-    editor,
-    node,
-    decorations: decorations as DecorationWithType[],
-    innerDecorations,
-    view,
-    selected: false,
-    extension,
-    HTMLAttributes,
-    getPos,
+  props = {
+    ...props,
     updateAttributes: (attrs = {}) => updateAttributes(attrs),
     deleteNode,
     ref: createRef<T>(),
-  }
+  } satisfies ReactNodeViewProps<T>
 
   if (!(Component as any).displayName) {
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.substring(1)
@@ -325,6 +311,6 @@ export function ReactNodeViewRenderer<T = HTMLElement>(
       return {} as unknown as ProseMirrorNodeView
     }
 
-    return createReactNodeView<T, ComponentType<ReactNodeViewProps<T>>, Editor, ReactNodeViewRendererOptions>(component, props, options)
+    return createReactNodeView<T>(component, props, options)
   }
 }

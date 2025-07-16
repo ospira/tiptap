@@ -14,10 +14,22 @@ import { createElement, createRef, memo } from 'react'
 import type { EditorWithContentComponent } from './Editor.js'
 import { ReactRenderer } from './ReactRenderer.js'
 import type { ReactNodeViewProps } from './types.js'
+import { ReactNode } from 'react'
 // once in mount()
-import type { ReactNodeViewContextProps } from './useReactNodeView.js'
+// import type { ReactNodeViewContextProps } from './useReactNodeView.js'
 // once in mount() (ReactNodeViewContext.Provider wraps createElement)
-import { ReactNodeViewContext } from './useReactNodeView.js'
+// import { ReactNodeViewContext } from './useReactNodeView.js'
+
+interface ReactNodeViewContextProps {
+  // why?
+  onDragStart?: (event: DragEvent) => void
+  nodeViewContentRef?: (element: HTMLElement | null) => void
+  /**
+   * This allows you to add children into the NodeViewContent component.
+   * This is useful when statically rendering the content of a node view.
+   */
+  nodeViewContentChildren?: ReactNode
+}
 
 export interface ReactNodeViewRendererOptions extends NodeViewRendererOptions {
   /**
@@ -61,6 +73,7 @@ export class ReactNodeView<
   NodeEditor extends Editor = Editor,
   Options extends ReactNodeViewRendererOptions = ReactNodeViewRendererOptions,
 > extends NodeView<Component, NodeEditor, Options> {
+
   /**
    * The renderer instance.
    */
@@ -104,6 +117,7 @@ export class ReactNodeView<
    * Called on initialization.
    */
   mount() {
+    console.log("you got served");
     const props = {
       editor: this.editor,
       node: this.node,
@@ -138,16 +152,16 @@ export class ReactNodeView<
         console.log({element})
       }
     }
-    const context = { onDragStart, nodeViewContentRef }
+    // const context = { onDragStart, nodeViewContentRef }
     const Component = this.component
     /// !!!!
     // For performance reasons, we memoize the provider component
     // And all of the things it requires are declared outside of the component, so it doesn't need to re-render
     const ReactNodeViewProvider: NamedExoticComponent<ReactNodeViewProps<T>> = memo(componentProps => {
       return (
-        <ReactNodeViewContext.Provider value={context}>
-          {createElement(Component, componentProps)}
-        </ReactNodeViewContext.Provider>
+        // <ReactNodeViewContext.Provider value={context}>
+          createElement(Component, {onDragStart, nodeViewContentRef, ...componentProps}, componentProps.children)
+        // </ReactNodeViewContext.Provider>
       )
     })
 
@@ -194,6 +208,7 @@ export class ReactNodeView<
    * This is the element that will be used to display the rich-text content of the node.
    */
   get contentDOM() {
+    console.log("contentDOM()")
     if (this.node.isLeaf) {
       return null
     }
@@ -338,6 +353,7 @@ export function ReactNodeViewRenderer<T = HTMLElement>(
   options?: Partial<ReactNodeViewRendererOptions>,
 ): NodeViewRenderer {
   return props => {
+    console.log("ReactNodeViewRenderer from RSC server!!!!");
     // try to get the parent component
     // this is important for vue devtools to show the component hierarchy correctly
     // maybe it’s `undefined` because <editor-content> isn’t rendered yet
